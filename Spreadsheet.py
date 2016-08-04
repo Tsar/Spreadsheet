@@ -296,7 +296,8 @@ def testCreateTimeManagementReport():
     ss.prepare_setValues("A1:A1", [[sheetTitle]])
     ss.prepare_setValues("A3:E%d" % (rowCount + 3), values)
 
-    #ss.prepare_setCellsFormat("D%d:D%d" % (rowCount + 3, rowCount + 3), {"textFormat": {"italic": True}, "horizontalAlignment": "CENTER"})  # Italic and center aligment for bottom D* cell
+    #ss.prepare_setCellsFormat("D%d:D%d" % (rowCount + 3, rowCount + 3), {"textFormat": {"italic": True}, "horizontalAlignment": "CENTER"},
+    #                          fields = "userEnteredFormat.textFormat,userEnteredFormat.horizontalAlignment")  # Italic and center aligment for bottom D* cell
 
     ss.prepare_setColumnWidth(6, 200)
     ss.prepare_setColumnWidth(7, 100)
