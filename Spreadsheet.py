@@ -178,22 +178,15 @@ class Spreadsheet:
     def prepare_mergeCells(self, cellsRange, mergeType = "MERGE_ALL"):
         self.requests.append({"mergeCells": {"range": self.toGridRange(cellsRange), "mergeType": mergeType}})
 
-    # formatJSON may be dict with userEnteredFormat to be applied to each row OR formatJSON may be list of dict with userEnteredFormat for each row
-    def prepare_setCellsFormat(self, cellsRange, formatJSON):
-        cellsRange = self.toGridRange(cellsRange)
-        rowsData = [{"values": {"userEnteredFormat": rowFormat}} for rowFormat in formatJSON] if isinstance(formatJSON, list) else [{"values": {"userEnteredFormat": formatJSON}}] * (cellsRange["endRowIndex"] - cellsRange["startRowIndex"])
-        #self.requests.append({"updateCells": {"range": cellsRange,
-        #                                      "rows": rowsData,
-        #                                      "fields": "userEnteredFormat"}})
-        ## Uncomment lines above and delete lines below when https://code.google.com/a/google.com/p/apps-api-issues/issues/detail?id=4611 is fixed.
-        ## Using lifehack for now (UpdateCellsRequest for each column)
-        columnsRange = range(cellsRange["startColumnIndex"], cellsRange["endColumnIndex"])
-        for i in columnsRange:
-            cellsRange["startColumnIndex"] = i
-            cellsRange["endColumnIndex"] = i + 1
-            self.requests.append({"updateCells": {"range": dict(cellsRange),
-                                                  "rows": rowsData,
-                                                  "fields": "userEnteredFormat"}})
+    # formatJSON should be dict with userEnteredFormat to be applied to each cell
+    def prepare_setCellsFormat(self, cellsRange, formatJSON, fields = "userEnteredFormat"):
+        self.requests.append({"repeatCell": {"range": self.toGridRange(cellsRange), "cell": {"userEnteredFormat": formatJSON}, "fields": fields}})
+
+    # formatsJSON should be list of lists of dicts with userEnteredFormat for each cell in each row
+    def prepare_setCellsFormats(self, cellsRange, formatsJSON, fields = "userEnteredFormat"):
+        self.requests.append({"updateCells": {"range": self.toGridRange(cellsRange),
+                                              "rows": [{"values": [{"userEnteredFormat": cellFormat} for cellFormat in rowFormats]} for rowFormats in formatsJSON],
+                                              "fields": fields}})
 
 
 # === Tests for class Spreadsheet ===
@@ -292,9 +285,9 @@ def testCreateTimeManagementReport():
 
     ss.prepare_setCellsFormat("A1:A1", {"textFormat": {"fontSize": 14}, "horizontalAlignment": "CENTER"})  # Font size 14 and center aligment for A1 cell
     ss.prepare_setCellsFormat("A3:E3", {"textFormat": {"bold": True}, "horizontalAlignment": "CENTER"})  # Bold and center aligment for A3:E3 row
-    ss.prepare_setCellsFormat("A4:B%d" % (rowCount + 3), [{"backgroundColor": color, "numberFormat": {'type': 'TEXT'}} for color in rowColors])  # Text format for A4:B* columns
-    ss.prepare_setCellsFormat("C4:D%d" % (rowCount + 3), [{"backgroundColor": color} for color in rowColors])
-    ss.prepare_setCellsFormat("E4:E%d" % (rowCount + 3), [{"backgroundColor": color, "numberFormat": {'pattern': '[h]:mm:ss', 'type': 'TIME'}} for color in rowColors])  # Duration number format for E4:E* column
+    ss.prepare_setCellsFormats("A4:E%d" % (rowCount + 3), [[{"backgroundColor": color}] * 5 for color in rowColors])
+    ss.prepare_setCellsFormat("A4:B%d" % (rowCount + 3), {"numberFormat": {'type': 'TEXT'}}, fields = "userEnteredFormat.numberFormat")  # Text format for A4:B* columns
+    ss.prepare_setCellsFormat("E4:E%d" % (rowCount + 3), {"numberFormat": {'pattern': '[h]:mm:ss', 'type': 'TIME'}}, fields = "userEnteredFormat.numberFormat")  # Duration number format for E4:E* column
 
     # Bottom border for A3:E3 row
     ss.requests.append({"updateBorders": {"range": {"sheetId": ss.sheetId, "startRowIndex": 2, "endRowIndex": 3, "startColumnIndex": 0, "endColumnIndex": 5},
@@ -313,8 +306,9 @@ def testCreateTimeManagementReport():
 
     ss.prepare_setCellsFormat("G1:G1", {"textFormat": {"fontSize": 14}, "horizontalAlignment": "CENTER"})  # Font size 14 and center aligment for G1 cell
     ss.prepare_setCellsFormat("G3:H3", {"textFormat": {"bold": True}, "horizontalAlignment": "CENTER"})  # Bold and center aligment for G3:H3 row
-    ss.prepare_setCellsFormat("G4:G%d" % (rowCount2 + 3), [{"backgroundColor": color, "numberFormat": {'type': 'TEXT'}} for color in rowColors2])  # Text format for G4:G* column
-    ss.prepare_setCellsFormat("H4:H%d" % (rowCount2 + 3), [{"backgroundColor": color, "numberFormat": {'pattern': '[h]:mm:ss', 'type': 'TIME'}} for color in rowColors2])  # Duration number format for H4:H* column
+    ss.prepare_setCellsFormats("G4:H%d" % (rowCount2 + 3), [[{"backgroundColor": color}] * 2 for color in rowColors2])
+    ss.prepare_setCellsFormat("G4:G%d" % (rowCount2 + 3), {"numberFormat": {'type': 'TEXT'}}, fields = "userEnteredFormat.numberFormat")  # Text format for G4:G* column
+    ss.prepare_setCellsFormat("H4:H%d" % (rowCount2 + 3), {"numberFormat": {'pattern': '[h]:mm:ss', 'type': 'TIME'}}, fields = "userEnteredFormat.numberFormat")  # Duration number format for H4:H* column
 
     # Bottom border for G3:H3 row
     ss.requests.append({"updateBorders": {"range": {"sheetId": ss.sheetId, "startRowIndex": 2, "endRowIndex": 3, "startColumnIndex": 6, "endColumnIndex": 8},
