@@ -251,6 +251,17 @@ def testPureBlackBorder():
     ss.runPrepared()
     # Reported: https://code.google.com/a/google.com/p/apps-api-issues/issues/detail?id=4696
 
+def testUpdateCellsFieldsArg():
+    ss = Spreadsheet(GOOGLE_CREDENTIALS_FILE, debugMode = True)
+    ss.setSpreadsheetById('19SPK--efwYq9pZ7TvBYtFItxE0gY3zpfR5NykOJ6o7I')
+    ss.prepare_setCellsFormat("B2:B2", {"textFormat": {"bold": True}, "horizontalAlignment": "CENTER"}, fields = "userEnteredFormat.textFormat,userEnteredFormat.horizontalAlignment")
+    ss.prepare_setCellsFormat("B2:B2", {"backgroundColor": htmlColorToJSON("#00CC00")}, fields = "userEnteredFormat.backgroundColor")
+    ss.prepare_setCellsFormats("C4:C4", [[{"textFormat": {"bold": True}, "horizontalAlignment": "CENTER"}]], fields = "userEnteredFormat.textFormat,userEnteredFormat.horizontalAlignment")
+    ss.prepare_setCellsFormats("C4:C4", [[{"backgroundColor": htmlColorToJSON("#00CC00")}]], fields = "userEnteredFormat.backgroundColor")
+    pprint(ss.requests)
+    ss.runPrepared()
+    # Reported: https://code.google.com/a/google.com/p/apps-api-issues/issues/detail?id=4697
+
 def testCreateTimeManagementReport():
     docTitle = "Тестовый документ"
     sheetTitle = "Тестовая таблица действий"
@@ -329,4 +340,5 @@ if __name__ == "__main__":
     #testGridRangeForStr()
     #testSetCellsFormat()
     #testPureBlackBorder()
+    #testUpdateCellsFieldsArg()
     testCreateTimeManagementReport()
