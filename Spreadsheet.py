@@ -4,7 +4,8 @@
 # This module uses Google Sheets API v4 (and Google Drive API v3 for sharing spreadsheets)
 
 # (!) Disclaimer
-# This is NOT a full-functional wrapper over Sheets API v4. This module was created just for https://telegram.me/TimeManagementBot and habrahabr article
+# This is NOT a full-functional wrapper over Sheets API v4.
+# This module was created just for https://telegram.me/TimeManagementBot and habrahabr article
 
 from pprint import pprint
 import httplib2
