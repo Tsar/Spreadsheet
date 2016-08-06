@@ -266,6 +266,7 @@ def testUpdateCellsFieldsArg():
     ss.runPrepared()
     # Reported: https://code.google.com/a/google.com/p/apps-api-issues/issues/detail?id=4697
 
+# This function creates a spreadsheet as https://telegram.me/TimeManagementBot can create, but with manually specified data
 def testCreateTimeManagementReport():
     docTitle = "Тестовый документ"
     sheetTitle = "Тестовая таблица действий"
